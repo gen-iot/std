@@ -7,6 +7,7 @@ import (
 )
 
 const KJsonIndent = "    "
+const KJsonIndentPrefix = ""
 
 type JsonObject map[string]interface{}
 
