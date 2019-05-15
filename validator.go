@@ -66,5 +66,5 @@ func ValidateStruct(i interface{}) error {
 }
 
 func Verify(i interface{}) error {
-    retrun gValidate.ValidateStructWithLanguage("zh",i)
+    return gValidate.ValidateStructWithLanguage("zh",i)
 }
