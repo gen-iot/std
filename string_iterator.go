@@ -7,10 +7,10 @@ type StringIterator interface {
 
 type StringArray []string
 
-func (this *StringArray) Len() int {
-	return len(*this)
+func (this StringArray) Len() int {
+	return len(this)
 }
 
-func (this *StringArray) At(idx int) string {
-	return (*this)[idx]
+func (this StringArray) At(idx int) string {
+	return this[idx]
 }
