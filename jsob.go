@@ -6,6 +6,9 @@ import (
 	"strconv"
 )
 
+const KJsonIndent = "    "
+const KJsonIndentPrefix = ""
+
 type JsonObject map[string]interface{}
 
 type JsonObjectLessFun func(l JsonObject, r JsonObject) bool
