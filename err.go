@@ -3,6 +3,7 @@ package std
 import (
 	"errors"
 	"fmt"
+	"strings"
 )
 
 type Err struct {
@@ -62,4 +63,15 @@ func Assert(cond bool, msg string) {
 	e := errors.New(fmt.Sprintf("assertFailed!,%s", msg))
 	panic(e)
 
+}
+
+type CombinedErrors []error
+
+func (this CombinedErrors) Error() string {
+	builder := strings.Builder{}
+
+	for idx, it := range this {
+		builder.WriteString(fmt.Sprintf("err %d:%s", idx+1, it.Error()))
+	}
+	return builder.String()
 }
