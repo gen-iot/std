@@ -66,5 +66,5 @@ func ValidateStruct(i interface{}) error {
 }
 
 func Verify(i interface{}) error {
-    return ValidateStructWithLanguage("zh",i)
+	return ValidateStructWithLanguage("zh", i)
 }
