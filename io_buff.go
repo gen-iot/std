@@ -27,6 +27,7 @@ type ReadableBuffer interface {
 	ReadableLen() int
 
 	ReadN(n int) []uint8
+	PeekN(offset, n int) []uint8
 	PopN(n int)
 }
 
