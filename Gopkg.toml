@@ -43,7 +43,7 @@
 
 [[constraint]]
   name = "github.com/vmihailenco/msgpack"
-  version = "master"
+  version = "4.0.4"
 
 [[constraint]]
   name = "gopkg.in/go-playground/validator.v9"
