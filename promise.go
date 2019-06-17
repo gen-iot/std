@@ -33,6 +33,11 @@ func NewPromise() Promise {
 	}
 }
 
+// get future
+func (this *promise) GetFuture() Future {
+	return this
+}
+
 //等待
 func (this *promise) Wait(timeout time.Duration) error {
 	_, err := this.WaitData(timeout)
