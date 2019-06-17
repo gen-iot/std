@@ -41,3 +41,9 @@ func (this *PromiseGroup) AddPromise(id PromiseId, c Promise) {
 	}
 	old.Done(ErrPromiseReplace)
 }
+
+func (this *PromiseGroup) RemovePromise(id PromiseId) {
+	defer this.lock.Unlock()
+	this.lock.Lock()
+	delete(this.hangs, id)
+}
