@@ -17,6 +17,7 @@ type Promise interface {
 	Future
 	Done(err error)
 	DoneData(err error, data interface{})
+	GetFuture() Future
 }
 
 type promise struct {
