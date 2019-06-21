@@ -186,3 +186,12 @@ func CalCRC16(arr []uint8) uint16 {
 	}
 	return crc
 }
+
+//计算异或和
+func CalcBCC(arr []uint8) uint8 {
+	bcc := uint8(0)
+	for _, b := range arr {
+		bcc ^= b
+	}
+	return bcc
+}
