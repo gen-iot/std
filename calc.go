@@ -1,5 +1,11 @@
 package std
 
+func MinInt(a, b int) int {
+	if a < b {
+		return a
+	}
+	return b
+}
 
 //big ending
 func Uint16ToArrBE(v uint16) []uint8 {
