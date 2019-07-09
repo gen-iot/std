@@ -21,6 +21,13 @@ var (
 	gValidate *validator.Validate
 )
 
+type LANG int
+
+const (
+	LANG_ZH LANG = iota
+	LANG_EN
+)
+
 func init() {
 	zh := zh.New()
 	en := en.New()
@@ -33,10 +40,28 @@ func init() {
 		}
 	}
 }
-func ValidateStructWithLanguage(lan string, i interface{}) error {
-	if len(lan) == 0 {
-		lan = "zh"
+func Str2Lang(lang string) LANG {
+	switch lang {
+	case "zh":
+		return LANG_ZH
+	case "cn":
+		return LANG_EN
 	}
+	return LANG_ZH
+}
+
+func Lang2Str(lang LANG) string {
+
+	switch lang {
+	case LANG_ZH:
+		return "zh"
+	case LANG_EN:
+		return "cn"
+	}
+	return "zh"
+}
+
+func ValidateStructWithLanguage(lang LANG, i interface{}) error {
 	e := gValidate.Struct(i)
 	if e != nil {
 		if _, ok := e.(*validator.InvalidValidationError); ok {
@@ -45,7 +70,7 @@ func ValidateStructWithLanguage(lan string, i interface{}) error {
 		// translate all error at once
 		var buffer bytes.Buffer
 		rawErrs := e.(validator.ValidationErrors)
-		trans, found := uni.GetTranslator(lan)
+		trans, found := uni.GetTranslator(Lang2Str(lang))
 		if found {
 			tansErrs := rawErrs.Translate(trans)
 			for _, err := range tansErrs {
@@ -62,9 +87,9 @@ func ValidateStructWithLanguage(lan string, i interface{}) error {
 }
 
 func ValidateStruct(i interface{}) error {
-	return ValidateStructWithLanguage("zh", i)
+	return ValidateStructWithLanguage(LANG_ZH, i)
 }
 
 func Verify(i interface{}) error {
-	return ValidateStructWithLanguage("zh", i)
+	return ValidateStructWithLanguage(LANG_ZH, i)
 }

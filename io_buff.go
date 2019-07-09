@@ -29,6 +29,8 @@ type ReadableBuffer interface {
 	ReadN(n int) []uint8
 	PeekN(offset, n int) []uint8
 	PopN(n int)
+	ToArray() []uint8
+	PopAll()
 }
 
 type WritableBuffer interface {
@@ -54,6 +56,10 @@ func (this *ByteBuffer) ToArray() []uint8 {
 		ret = append(ret, ele.Value.(uint8))
 	}
 	return ret
+}
+
+func (this *ByteBuffer) PopAll() {
+	this.PopN(this.ReadableLen())
 }
 
 func (this *ByteBuffer) Write(arr []uint8) {
