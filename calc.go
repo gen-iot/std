@@ -53,9 +53,20 @@ func AbsInt64(a int64) int64 {
 
 //convert uint8 array to string
 func ArrToHexStr(arr []uint8) string {
+	return ArrToHexStrWithSp(arr, " ")
+}
+
+func ArrToHexStrWithSp(arr []uint8, sp string) string {
+	if arr == nil || len(arr) == 0 {
+		return ""
+	}
 	builder := strings.Builder{}
-	for _, it := range arr {
-		builder.WriteString(fmt.Sprintf("%02X ", it))
+	for i := 0; i < len(arr); i++ {
+		if i == len(arr)-1 {
+			builder.WriteString(fmt.Sprintf("%02X", arr[i]))
+		} else {
+			builder.WriteString(fmt.Sprintf("%02X%s", arr[i], sp))
+		}
 	}
 	return builder.String()
 }
