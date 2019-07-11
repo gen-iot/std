@@ -17,9 +17,19 @@ import (
 
 // use a single instance , it caches struct info
 var (
-	uni       *ut.UniversalTranslator
-	gValidate *validator.Validate
+	uni          *ut.UniversalTranslator
+	gValidate    *validator.Validate
+	gValidatorZH = NewValidator(LANG_ZH)
+	gValidatorEN = NewValidator(LANG_EN)
 )
+
+func DefaultValidatorZH() Validator {
+	return gValidatorZH
+}
+
+func DefaultValidatorEN() Validator {
+	return gValidatorEN
+}
 
 type LANG int
 
@@ -29,9 +39,9 @@ const (
 )
 
 func init() {
-	zh := zh.New()
-	en := en.New()
-	uni = ut.New(zh, zh, en)
+	lczh := zh.New()
+	lcen := en.New()
+	uni = ut.New(lczh, lczh, lcen)
 	gValidate = validator.New()
 	trans, found := uni.GetTranslator("zh")
 	if found {
@@ -59,6 +69,10 @@ func Lang2Str(lang LANG) string {
 		return "cn"
 	}
 	return "zh"
+}
+
+type Validator interface {
+	Validate(i interface{}) error
 }
 
 func ValidateStructWithLanguage(lang LANG, i interface{}) error {
@@ -92,4 +106,18 @@ func ValidateStruct(i interface{}) error {
 
 func Verify(i interface{}) error {
 	return ValidateStructWithLanguage(LANG_ZH, i)
+}
+
+type __validator struct {
+	lang LANG
+}
+
+func NewValidator(lang LANG) Validator {
+	return &__validator{
+		lang: lang,
+	}
+}
+
+func (this *__validator) Validate(i interface{}) error {
+	return ValidateStructWithLanguage(this.lang, i)
 }
