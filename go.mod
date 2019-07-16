@@ -1,4 +1,4 @@
-module std
+module gitee.com/gen-iot/std
 
 go 1.12
 
