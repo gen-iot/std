@@ -50,7 +50,7 @@ func (this *WorkerPool) workerTask(wg *sync.WaitGroup) {
 		default:
 		}
 		this.cond.L.Lock()
-		if this.workQ.Len() == 0{
+		if this.workQ.Len() == 0 {
 			this.cond.Wait()
 		}
 		if this.workQ.Len() == 0 {
