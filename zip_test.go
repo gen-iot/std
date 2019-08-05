@@ -23,14 +23,11 @@ func TestZip(t *testing.T) {
 	fmt.Println("wd=", wd)
 	file, err := os.OpenFile("output.zip", os.O_CREATE|os.O_TRUNC|os.O_RDWR, 0644)
 	AssertError(err, "create output")
-	defer func() {
-		_ = os.Remove("output.zip")
-	}()
+	defer CloseIgnoreErr(file)
 	err = Zip(file, []*FileGroup{
-		NewFileGroup(".", "go.mod", "go.sum").SetCustomDirName("c"),
-		NewFileGroup(".idea", "misc.xml", "modules.xml", "workspace.xml").
-			AddChildFileGroup(NewFileGroup("inspectionProfiles", "Project_Default.xml").SetCustomDirName("a")).
-			AddChildFileGroup(NewFileGroup(".idea/example", "utils.go", "utils_test.go").SetCustomDirName("b")),
+		NewFileGroup(".", "go.mod").SetCustomDirName("c").AddFileItemWithAlias("go.sum", "goSum"),
+		NewFileGroup(".idea", "misc.xml", "modules.xml", "workspace.xml").SetCustomDirName(".").
+			AddChildFileGroup(NewFileGroup("inspectionProfiles", "Project_Default.xml").SetCustomDirName("a")),
 	})
 	AssertError(err, "zip failed")
 }

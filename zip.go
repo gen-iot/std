@@ -8,19 +8,20 @@ import (
 	"path/filepath"
 )
 
+type zipFileItem struct {
+	rawFileName   string
+	inZipFileName string
+}
+
 type FileGroup struct {
 	rawDir          string
 	dirName         string
-	childFiles      []string
+	childFiles      []*zipFileItem
 	childFileGroups []*FileGroup
 }
 
 func (this *FileGroup) GetDirName() string {
 	return this.dirName
-}
-
-func (this *FileGroup) GetChildFiles() []string {
-	return this.childFiles
 }
 
 func (this *FileGroup) SetCustomDirName(dirName string) *FileGroup {
@@ -42,9 +43,9 @@ func NewFileGroup(dir string, childFiles ...string) *FileGroup {
 	if len(childFiles) == 0 {
 		return out
 	}
-	out.childFiles = make([]string, 0, len(childFiles))
+	out.childFiles = make([]*zipFileItem, 0, len(childFiles))
 	for idx := range childFiles {
-		out.childFiles = append(out.childFiles, filepath.Base(childFiles[idx]))
+		_ = out.AddFileItem(childFiles[idx])
 	}
 	return out
 }
@@ -65,6 +66,24 @@ func (this *FileGroup) AddChildFileGroup(fgs ...*FileGroup) *FileGroup {
 	return this
 }
 
+func (this *FileGroup) AddFileItem(file string) *FileGroup {
+	baseName := filepath.Base(file)
+	this.childFiles = append(this.childFiles, &zipFileItem{
+		rawFileName:   baseName,
+		inZipFileName: baseName,
+	})
+	return this
+}
+
+func (this *FileGroup) AddFileItemWithAlias(file, alias string) *FileGroup {
+	baseName := filepath.Base(file)
+	this.childFiles = append(this.childFiles, &zipFileItem{
+		rawFileName:   baseName,
+		inZipFileName: alias,
+	})
+	return this
+}
+
 func zipFilesDetails(zipWriter *zip.Writer, fgs []*FileGroup) error {
 	curDir := "."
 	for _, fg := range fgs {
@@ -77,12 +96,12 @@ func zipFilesDetails(zipWriter *zip.Writer, fgs []*FileGroup) error {
 		} else {
 			curDir = "."
 		}
-		for _, fName := range fg.childFiles {
-			writer, err := zipWriter.Create(filepath.Join(curDir, fName))
+		for _, it := range fg.childFiles {
+			writer, err := zipWriter.Create(filepath.Join(curDir, it.inZipFileName))
 			if err != nil {
 				return err
 			}
-			file, err := os.Open(filepath.Join(fg.rawDir, fName))
+			file, err := os.Open(filepath.Join(fg.rawDir, it.rawFileName))
 			if err != nil {
 				return err
 			}
