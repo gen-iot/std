@@ -38,19 +38,20 @@ type WritableBuffer interface {
 	WriteUInt8(v uint8)
 	WriteUInt16(v uint16)
 	WriteInt32(v int32)
+	WriteUInt32(v uint32)
 }
 
-type ByteBuffer struct {
+type byteBufferImpl struct {
 	data *list.List
 }
 
-func NewByteBuffer() *ByteBuffer {
-	return &ByteBuffer{
+func NewByteBuffer() RwBuffer {
+	return &byteBufferImpl{
 		data: list.New(),
 	}
 }
 
-func (this *ByteBuffer) ToArray() []uint8 {
+func (this *byteBufferImpl) ToArray() []uint8 {
 	ret := make([]uint8, 0, this.ReadableLen())
 	for ele := this.data.Front(); ele != nil; ele = ele.Next() {
 		ret = append(ret, ele.Value.(uint8))
@@ -58,22 +59,22 @@ func (this *ByteBuffer) ToArray() []uint8 {
 	return ret
 }
 
-func (this *ByteBuffer) PopAll() {
+func (this *byteBufferImpl) PopAll() {
 	this.PopN(this.ReadableLen())
 }
 
-func (this *ByteBuffer) Write(arr []uint8) {
+func (this *byteBufferImpl) Write(arr []uint8) {
 	for _, v := range arr {
 		this.data.PushBack(v)
 	}
 }
 
-func (this *ByteBuffer) WriteUInt8(v uint8) {
+func (this *byteBufferImpl) WriteUInt8(v uint8) {
 	this.data.PushBack(v)
 }
 
 //checkout ReadableLen before call this
-func (this *ByteBuffer) PeekN(offset, n int) []uint8 {
+func (this *byteBufferImpl) PeekN(offset, n int) []uint8 {
 	arr := make([]uint8, 0, n)
 	var ele = this.data.Front()
 	for i := 0; i < offset; ele = ele.Next() {
@@ -90,7 +91,7 @@ func (this *ByteBuffer) PeekN(offset, n int) []uint8 {
 }
 
 //checkout ReadableLen before call this
-func (this *ByteBuffer) ReadN(n int) []uint8 {
+func (this *byteBufferImpl) ReadN(n int) []uint8 {
 	arr := make([]uint8, 0, n)
 	dataN := this.data.Len()
 	for i := 0; i < n && i < dataN; i++ {
@@ -105,11 +106,11 @@ func (this *ByteBuffer) ReadN(n int) []uint8 {
 }
 
 //array len
-func (this *ByteBuffer) ReadableLen() int {
+func (this *byteBufferImpl) ReadableLen() int {
 	return this.data.Len()
 }
 
-func (this *ByteBuffer) PopN(n int) {
+func (this *byteBufferImpl) PopN(n int) {
 	for i := 0; i < n; i++ {
 		front := this.data.Front()
 		if front != nil {
@@ -118,58 +119,62 @@ func (this *ByteBuffer) PopN(n int) {
 	}
 }
 
-func (this *ByteBuffer) ReadInt32() int32 {
+func (this *byteBufferImpl) ReadInt32() int32 {
 	return ArrayToInt32BE(this.ReadN(4))
 }
 
-func (this *ByteBuffer) ReadUInt32() uint32 {
+func (this *byteBufferImpl) ReadUInt32() uint32 {
 	return ArrToUint32BE(this.ReadN(4))
 }
 
-func (this *ByteBuffer) ReadInt16() int16 {
+func (this *byteBufferImpl) ReadInt16() int16 {
 	return ArrToInt16BE(this.ReadN(2))
 }
 
-func (this *ByteBuffer) ReadUInt16() uint16 {
+func (this *byteBufferImpl) ReadUInt16() uint16 {
 	return ArrToUint16BE(this.ReadN(2))
 }
 
-func (this *ByteBuffer) ReadInt8() int8 {
+func (this *byteBufferImpl) ReadInt8() int8 {
 	return int8(this.ReadN(1)[0])
 }
 
-func (this *ByteBuffer) ReadUInt8() uint8 {
+func (this *byteBufferImpl) ReadUInt8() uint8 {
 	return this.ReadN(1)[0]
 }
 
-func (this *ByteBuffer) PeekInt32(offset int) int32 {
+func (this *byteBufferImpl) PeekInt32(offset int) int32 {
 	return ArrayToInt32BE(this.PeekN(offset, 4))
 }
 
-func (this *ByteBuffer) PeekUInt32(offset int) uint32 {
+func (this *byteBufferImpl) PeekUInt32(offset int) uint32 {
 	return ArrToUint32BE(this.PeekN(offset, 4))
 }
 
-func (this *ByteBuffer) PeekInt16(offset int) int16 {
+func (this *byteBufferImpl) PeekInt16(offset int) int16 {
 	return ArrToInt16BE(this.PeekN(offset, 2))
 }
 
-func (this *ByteBuffer) PeekUInt16(offset int) uint16 {
+func (this *byteBufferImpl) PeekUInt16(offset int) uint16 {
 	return ArrToUint16BE(this.PeekN(offset, 2))
 }
 
-func (this *ByteBuffer) PeekInt8(offset int) int8 {
+func (this *byteBufferImpl) PeekInt8(offset int) int8 {
 	return int8(this.PeekN(offset, 1)[0])
 }
 
-func (this *ByteBuffer) PeekUInt8(offset int) uint8 {
+func (this *byteBufferImpl) PeekUInt8(offset int) uint8 {
 	return this.PeekN(offset, 1)[0]
 }
 
-func (this *ByteBuffer) WriteUInt16(v uint16) {
+func (this *byteBufferImpl) WriteUInt16(v uint16) {
 	this.Write(Uint16ToArrBE(v))
 }
 
-func (this *ByteBuffer) WriteInt32(v int32) {
+func (this *byteBufferImpl) WriteInt32(v int32) {
 	this.Write(Int32ToArrBE(v))
+}
+
+func (this *byteBufferImpl) WriteUInt32(v uint32) {
+	this.Write(UInt32ToArrBE(v))
 }

@@ -116,6 +116,11 @@ func Int32ToArrBE(v int32) []uint8 {
 }
 
 //big ending
+func UInt32ToArrBE(v uint32) []uint8 {
+	return []uint8{uint8(v>>24) & 0xFF, uint8(v>>16) & 0xFF, uint8(v>>8) & 0xFF, uint8(v) & 0xFF}
+}
+
+//big ending
 func ArrayToInt32BE(arr []uint8) int32 {
 	if len(arr) != 4 {
 		return 0

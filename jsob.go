@@ -2,8 +2,6 @@ package std
 
 import (
 	"encoding/json"
-	"fmt"
-	"strconv"
 )
 
 const KJsonIndent = "    "
@@ -64,11 +62,63 @@ func (this JsonObject) GetString(k string) string {
 }
 
 func any2Int(v interface{}, def int) int {
-	value, err := strconv.Atoi(fmt.Sprintf("%v", v))
-	if err != nil {
+	out := 0
+	switch num := v.(type) {
+
+	//
+	case uint8:
+		out = int(num)
+	case uint16:
+		out = int(num)
+	case uint:
+		out = int(num)
+	case uint32:
+		out = int(num)
+	case uint64:
+		out = int(num)
+	case *uint8:
+		out = int(*num)
+	case *uint16:
+		out = int(*num)
+	case *uint:
+		out = int(*num)
+	case *uint32:
+		out = int(*num)
+	case *uint64:
+		out = int(*num)
+	//
+	case int8:
+		out = int(num)
+	case int16:
+		out = int(num)
+	case int:
+		out = num
+	case int32:
+		out = int(num)
+	case int64:
+		out = int(num)
+	case float32:
+		out = int(num)
+	case float64:
+		out = int(num)
+	case *int8:
+		out = int(*num)
+	case *int16:
+		out = int(*num)
+	case *int:
+		out = *num
+	case *int32:
+		out = int(*num)
+	case *int64:
+		out = int(*num)
+	case *float32:
+		out = int(*num)
+	case *float64:
+		out = int(*num)
+	default:
 		return def
 	}
-	return value
+	return out
 }
 
 func (this JsonObject) GetIntOr(k string, def int) int {
