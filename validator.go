@@ -54,7 +54,7 @@ func Str2Lang(lang string) LANG {
 	switch lang {
 	case "zh":
 		return LANG_ZH
-	case "cn":
+	case "en":
 		return LANG_EN
 	}
 	return LANG_ZH
@@ -66,7 +66,7 @@ func Lang2Str(lang LANG) string {
 	case LANG_ZH:
 		return "zh"
 	case LANG_EN:
-		return "cn"
+		return "en"
 	}
 	return "zh"
 }
@@ -88,11 +88,11 @@ func ValidateStructWithLanguage(lang LANG, i interface{}) error {
 		if found {
 			tansErrs := rawErrs.Translate(trans)
 			for _, err := range tansErrs {
-				buffer.WriteString(fmt.Sprintf("%s\n", err))
+				buffer.WriteString(fmt.Sprintf("%s;", err))
 			}
 		} else {
 			for _, err := range rawErrs {
-				buffer.WriteString(fmt.Sprintf("param:'%s' type:'%s' miss match with check:'%s'\n", err.Field(), err.Kind(), err.Tag()))
+				buffer.WriteString(fmt.Sprintf("param:'%s' type:'%s' miss match with check:'%s';", err.Field(), err.Kind(), err.Tag()))
 			}
 		}
 		return errors.New(buffer.String())
