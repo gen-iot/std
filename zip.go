@@ -134,6 +134,7 @@ func UnZip(zipFilePath, output string) error {
 	if err != nil {
 		return err
 	}
+	defer CloseIgnoreErr(zrc)
 	for _, f := range zrc.File {
 		info := f.FileInfo()
 		outputTarget := filepath.Join(output, f.Name)
@@ -154,6 +155,7 @@ func UnZip(zipFilePath, output string) error {
 		}
 		_, err = io.Copy(file, rc)
 		_ = rc.Close()
+		_ = file.Close()
 		if err != nil {
 			return err
 		}
