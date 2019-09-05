@@ -137,15 +137,16 @@ func UnZip(zipFilePath, output string) error {
 	defer CloseIgnoreErr(zrc)
 	for _, f := range zrc.File {
 		info := f.FileInfo()
+		mode := info.Mode()
 		outputTarget := filepath.Join(output, f.Name)
 		if info.IsDir() {
-			err := os.MkdirAll(outputTarget, info.Mode())
+			err := os.MkdirAll(outputTarget, mode|0755)
 			if err != nil {
 				return err
 			}
 			continue
 		}
-		file, err := os.OpenFile(outputTarget, os.O_CREATE|os.O_TRUNC|os.O_RDWR, info.Mode())
+		file, err := os.OpenFile(outputTarget, os.O_CREATE|os.O_TRUNC|os.O_WRONLY, mode|0766)
 		if err != nil {
 			return err
 		}
