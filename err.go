@@ -1,8 +1,8 @@
 package std
 
 import (
-	"errors"
 	"fmt"
+	"github.com/pkg/errors"
 	"strings"
 )
 
@@ -45,11 +45,10 @@ func AssertError(err error, msg string) {
 	if err == nil {
 		return
 	}
-	output := fmt.Sprintf("%s :causedBy %s", msg, err.Error())
 	//defer func() {
 	//	Assert(false, output)
 	//}()
-	panic(output)
+	panic(errors.Wrapf(err, "%s :causedBy", msg))
 }
 
 func Assert(cond bool, msg string) {
@@ -60,7 +59,7 @@ func Assert(cond bool, msg string) {
 	//	const abortCode = 6
 	//	os.Exit(abortCode)
 	//}()
-	e := errors.New(fmt.Sprintf("assertFailed!,%s", msg))
+	e := errors.Errorf("assertFailed!,%s", msg)
 	panic(e)
 
 }
@@ -69,7 +68,6 @@ type CombinedErrors []error
 
 func (this CombinedErrors) Error() string {
 	builder := strings.Builder{}
-
 	for idx, it := range this {
 		builder.WriteString(fmt.Sprintf("err %d:%s", idx+1, it.Error()))
 	}
