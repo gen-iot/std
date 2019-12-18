@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 )
 
-const KJsonIndent = "    "
+const KJsonIndent = "  "
 const KJsonIndentPrefix = ""
 
 type JsonObject map[string]interface{}
