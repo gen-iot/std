@@ -29,8 +29,17 @@ type ListNetFlag = int
 const (
 	SkipLoopbackIP ListNetFlag = 1
 	SkipNoMac      ListNetFlag = 2
-	SkipDefault                = SkipLoopbackIP | SkipNoMac
+	SkipIPV4       ListNetFlag = 4
+	SkipIPV6       ListNetFlag = 8
+	SkipDefault                = SkipLoopbackIP | SkipNoMac | SkipIPV6
 )
+
+func IsIPV4(ip net.IP) bool {
+	if tip := ip.To4(); len(tip) == net.IPv4len {
+		return true
+	}
+	return false
+}
 
 func NetworkList(flag ListNetFlag) (netIfs []NetInterfaces, err error) {
 	ifs, err := net.Interfaces()
@@ -53,6 +62,13 @@ func NetworkList(flag ListNetFlag) (netIfs []NetInterfaces, err error) {
 		for _, it := range address {
 			ipAddr := it.(*net.IPNet)
 			if flag&SkipLoopbackIP != 0 && ipAddr.IP.IsLoopback() {
+				continue
+			}
+			isV4 := IsIPV4(ipAddr.IP)
+			if flag&SkipIPV4 != 0 && isV4 {
+				continue
+			}
+			if flag&SkipIPV6 != 0 && !isV4 {
 				continue
 			}
 			netIf.Address = append(netIf.Address, AddressInfo{
