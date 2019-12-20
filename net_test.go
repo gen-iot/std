@@ -6,7 +6,7 @@ import (
 )
 
 func TestListIf(t *testing.T) {
-	netIfs, err := NetworkList()
+	netIfs, err := NetworkList(SkipDefault)
 	AssertError(err, "list network")
 	jstr, err := json.MarshalIndent(netIfs, KJsonIndentPrefix, KJsonIndent)
 	AssertError(err, "marshal indent")
