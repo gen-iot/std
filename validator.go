@@ -23,6 +23,10 @@ var (
 	gValidatorEN = NewValidator(LANG_EN)
 )
 
+func GlobalValidator() *validator.Validate {
+	return gValidate
+}
+
 func DefaultValidatorZH() Validator {
 	return gValidatorZH
 }
