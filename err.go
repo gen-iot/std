@@ -16,6 +16,36 @@ func (this *Err) Error() string {
 	return this.Msg
 }
 
+func Error(msg string) *Err {
+	out := NewError(0, msg, nil)
+	return out
+}
+
+func Errorf(format string, args ...interface{}) *Err {
+	out := NewError(0, fmt.Sprintf(format, args...), nil)
+	return out
+}
+
+func ErrorWrap(err error, msg string) *Err {
+	out := Error(msg)
+	out.Msg = fmt.Sprintf("%s causedBy:%v", out.Msg, err)
+	return out
+}
+
+func ErrorWrapf(err error, format string, args ...interface{}) *Err {
+	return ErrorWrap(err, fmt.Sprintf(format, args...))
+}
+
+func (this *Err) SetCode(code int) *Err {
+	this.Code = code
+	return this
+}
+
+func (this *Err) SetData(data interface{}) *Err {
+	this.Data = data
+	return this
+}
+
 func NewError(code int, msg string, data interface{}) *Err {
 	return &Err{
 		code,
