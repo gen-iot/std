@@ -6,69 +6,96 @@ import (
 	"strings"
 )
 
-type Err struct {
+type Error interface {
+	SetCode(code int) Error
+	SetMsg(msg string) Error
+	SetData(data interface{}) Error
+	GetData() interface{}
+	GetMsg() string
+	GetCode() int
+	Is(err error) bool
+}
+
+type _stdError struct {
 	Code int         `json:"code"` // 错误码
 	Msg  string      `json:"msg"`  // 错误信息
 	Data interface{} `json:"data,omitempty"`
 }
 
-func (this *Err) Error() string {
+func (this *_stdError) GetCode() int {
+	return this.Code
+}
+
+func (this *_stdError) GetMsg() string {
 	return this.Msg
 }
 
-func Error(msg string) *Err {
-	out := NewError(0, msg, nil)
+func (this *_stdError) GetData() interface{} {
+	return this.Data
+}
+
+func (this *_stdError) Error() string {
+	return this.Msg
+}
+
+func (this *_stdError) Is(err error) bool {
+	if err == nil {
+		return false
+	}
+	if xe, ok := err.(*_stdError); ok {
+		return xe.Code == this.Code
+	}
+	return false
+}
+
+func NewError(msg string) Error {
+	return &_stdError{
+		0, msg, nil,
+	}
+}
+
+func Errorf(format string, args ...interface{}) Error {
+	out := NewError(fmt.Sprintf(format, args...))
 	return out
 }
 
-func Errorf(format string, args ...interface{}) *Err {
-	out := NewError(0, fmt.Sprintf(format, args...), nil)
+func ErrorWrap(err error, msg string) Error {
+	out := NewError(msg)
+	out.SetMsg(fmt.Sprintf("%s causedBy:%v", out.GetMsg(), err))
+	if err != nil {
+		if xe, ok := err.(*_stdError); ok {
+			out.SetCode(xe.Code)
+			out.SetData(xe.Data)
+		}
+	}
 	return out
 }
 
-func ErrorWrap(err error, msg string) *Err {
-	out := Error(msg)
-	out.Msg = fmt.Sprintf("%s causedBy:%v", out.Msg, err)
-	return out
-}
-
-func ErrorWrapf(err error, format string, args ...interface{}) *Err {
+func ErrorWrapf(err error, format string, args ...interface{}) Error {
 	return ErrorWrap(err, fmt.Sprintf(format, args...))
 }
 
-func (this *Err) SetCode(code int) *Err {
+func (this *_stdError) SetMsg(msg string) Error {
+	this.Msg = msg
+	return this
+}
+
+func (this *_stdError) SetCode(code int) Error {
 	this.Code = code
 	return this
 }
 
-func (this *Err) SetData(data interface{}) *Err {
+func (this *_stdError) SetData(data interface{}) Error {
 	this.Data = data
 	return this
 }
 
-func NewError(code int, msg string, data interface{}) *Err {
-	return &Err{
-		code,
-		msg,
-		data,
+func IsStdError(e error) (err Error, ok bool) {
+	if e == nil {
+		return nil, false
 	}
-}
-
-//错误码 = -1
-func ErrorMsg(msg string) *Err {
-	return NewError(-1, msg, nil)
-}
-
-func ErrorWithErr(msg string, err error) *Err {
-	return ErrorMsg(fmt.Sprintf("%s :causedBy %s", msg, err.Error()))
-}
-
-func NewSuccess() *Err {
-	return NewSuccessWithData(nil)
-}
-
-func NewSuccessWithData(data interface{}) *Err {
-	return NewError(0, "success", data)
+	err, ok = e.(*_stdError)
+	return
 }
 
 func AssertError(err error, msg string) {
