@@ -14,6 +14,7 @@ type Error interface {
 	GetMsg() string
 	GetCode() int
 	Is(err error) bool
+	Error() string
 }
 
 type _stdError struct {
