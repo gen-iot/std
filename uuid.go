@@ -1,11 +1,11 @@
 package std
 
 import (
-	guuid "github.com/satori/go.uuid"
+	"github.com/google/uuid"
 	"strings"
 )
 
 //创建随机uuid id
 func GenRandomUUID() string {
-	return strings.Replace(guuid.NewV4().String(), "-", "", -1)
+	return strings.Replace(uuid.New().String(), "-", "", -1)
 }

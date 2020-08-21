@@ -18,9 +18,10 @@ type Error interface {
 }
 
 type _stdError struct {
-	Code int         `json:"code"` // 错误码
-	Msg  string      `json:"msg"`  // 错误信息
-	Data interface{} `json:"data,omitempty"`
+	Code    int         `json:"code"`           // 错误码
+	Msg     string      `json:"msg"`            // 错误信息
+	Data    interface{} `json:"data,omitempty"` // data
+	inherit error       // 包装的外部error
 }
 
 func (this *_stdError) GetCode() int {
@@ -43,33 +44,32 @@ func (this *_stdError) Is(err error) bool {
 	if err == nil {
 		return false
 	}
-	if xe, ok := err.(*_stdError); ok {
-		return xe.Code == this.Code
+	if err == error(this) || this.inherit == err {
+		return true
+	}
+	xe, ok := this.inherit.(*_stdError)
+	if ok {
+		return xe.Is(err)
 	}
 	return false
 }
 
-func NewError(msg string) Error {
+func NewError() Error {
+	return new(_stdError)
+}
+
+func newErrorWrapped(err error) *_stdError {
 	return &_stdError{
-		0, msg, nil,
+		inherit: err,
 	}
 }
 
 func Errorf(format string, args ...interface{}) Error {
-	out := NewError(fmt.Sprintf(format, args...))
-	return out
+	return NewError().SetMsg(fmt.Sprintf(format, args...))
 }
 
 func ErrorWrap(err error, msg string) Error {
-	out := NewError(msg)
-	out.SetMsg(fmt.Sprintf("%s causedBy:%v", out.GetMsg(), err))
-	if err != nil {
-		if xe, ok := err.(*_stdError); ok {
-			out.SetCode(xe.Code)
-			out.SetData(xe.Data)
-		}
-	}
-	return out
+	return newErrorWrapped(err).SetMsg(fmt.Sprintf("%s:%s", msg, err.Error()))
 }
 
 func ErrorWrapf(err error, format string, args ...interface{}) Error {

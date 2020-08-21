@@ -1,9 +1,7 @@
 package std
 
 import (
-	"bytes"
 	"encoding/json"
-	"github.com/vmihailenco/msgpack"
 )
 
 type Serialization interface {
@@ -24,28 +22,11 @@ func (this *binderProxy) UnMarshal(data []byte, v interface{}) error {
 	return this.unmarshalFn(data, v)
 }
 
-var JsonSerialization Serialization = &binderProxy{
+var jsonSerialization Serialization = &binderProxy{
 	marshalFn:   json.Marshal,
 	unmarshalFn: json.Unmarshal,
 }
 
-var MsgPackSerialization Serialization = &binderProxy{
-	marshalFn:   MsgpackMarshal,
-	unmarshalFn: MsgpackUnmarshal,
-}
-
-func MsgpackMarshal(o interface{}) ([]byte, error) {
-	buffer := &bytes.Buffer{}
-	encoder := msgpack.NewEncoder(buffer)
-	encoder.UseJSONTag(true)
-	err := encoder.Encode(o)
-	return buffer.Bytes(), err
-}
-
-func MsgpackUnmarshal(data []byte, o interface{}) error {
-	reader := bytes.NewReader(data)
-	decoder := msgpack.NewDecoder(reader)
-	decoder.UseJSONTag(true)
-	err := decoder.Decode(o)
-	return err
+func JsonSerialization() Serialization {
+	return jsonSerialization
 }

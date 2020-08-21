@@ -6,13 +6,14 @@ import (
 	"github.com/go-playground/locales/en"
 	"github.com/go-playground/locales/zh"
 	"github.com/go-playground/universal-translator"
+	"github.com/go-playground/validator/v10"
+	zhTranslations "github.com/go-playground/validator/v10/translations/zh"
 	"github.com/pkg/errors"
-	"gopkg.in/go-playground/validator.v9"
-	zhTranslations "gopkg.in/go-playground/validator.v9/translations/zh"
 )
 
 /**
  * Created by xuchao on 2019-03-06 .
+ * Update by suzhen on 2020-08-21 .
  */
 
 // use a single instance , it caches struct info
@@ -104,12 +105,14 @@ func ValidateStructWithLanguage(lang LANG, i interface{}) error {
 	return nil
 }
 
+// @see ValidateStructWithLanguage LANG_EN
 func ValidateStruct(i interface{}) error {
-	return ValidateStructWithLanguage(LANG_ZH, i)
+	return ValidateStructWithLanguage(LANG_EN, i)
 }
 
+// @see ValidateStructWithLanguage LANG_EN
 func Verify(i interface{}) error {
-	return ValidateStructWithLanguage(LANG_ZH, i)
+	return ValidateStructWithLanguage(LANG_EN, i)
 }
 
 type __validator struct {
