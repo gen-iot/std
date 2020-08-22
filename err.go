@@ -58,7 +58,12 @@ func (this *_stdError) Is(err error) bool {
 }
 
 func NewError() Error {
-	return new(_stdError)
+	return &_stdError{
+		Code:    0,
+		Msg:     "success",
+		Data:    nil,
+		inherit: nil,
+	}
 }
 
 func newErrorWrapped(err error) *_stdError {
