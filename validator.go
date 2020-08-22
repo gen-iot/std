@@ -20,8 +20,8 @@ import (
 var (
 	uni          *ut.UniversalTranslator
 	gValidate    *validator.Validate
-	gValidatorZH = NewValidator(LANG_ZH)
-	gValidatorEN = NewValidator(LANG_EN)
+	gValidatorZH = NewValidator(LangZH)
+	gValidatorEN = NewValidator(LangEN)
 )
 
 func GlobalValidator() *validator.Validate {
@@ -39,41 +39,50 @@ func DefaultValidatorEN() Validator {
 type LANG int
 
 const (
-	LANG_ZH LANG = iota
-	LANG_EN
+	LangZH LANG = iota
+	LangEN
+)
+
+const (
+	StrLangZH = "zh"
+	StrLangEN = "en"
 )
 
 func init() {
-	lczh := zh.New()
-	lcen := en.New()
-	uni = ut.New(lczh, lczh, lcen)
+	zhTranslator := zh.New()
+	enTranslator := en.New()
+	uni = ut.New(enTranslator, zhTranslator, enTranslator)
 	gValidate = validator.New()
-	trans, found := uni.GetTranslator("zh")
+	trans, found := uni.GetTranslator(StrLangZH)
 	if found {
 		if err := zhTranslations.RegisterDefaultTranslations(gValidate, trans); err != nil {
 			panic(err)
 		}
 	}
 }
-func Str2Lang(lang string) LANG {
-	switch lang {
-	case "zh":
-		return LANG_ZH
-	case "en":
-		return LANG_EN
+
+var ValidateUnknownLANG = errors.New("unknown lang")
+
+func (this *LANG) MarshalText() (text []byte, err error) {
+	switch *this {
+	case LangZH:
+		return []byte(StrLangZH), nil
+	case LangEN:
+		return []byte(StrLangEN), nil
 	}
-	return LANG_ZH
+	return nil, ValidateUnknownLANG
 }
 
-func Lang2Str(lang LANG) string {
-
-	switch lang {
-	case LANG_ZH:
-		return "zh"
-	case LANG_EN:
-		return "en"
+func (this *LANG) UnmarshalText(text []byte) error {
+	switch string(text) {
+	case StrLangZH:
+		*this = LangZH
+	case StrLangEN:
+		*this = LangEN
+	default:
+		return ValidateUnknownLANG
 	}
-	return "zh"
+	return nil
 }
 
 type Validator interface {
@@ -89,7 +98,11 @@ func ValidateStructWithLanguage(lang LANG, i interface{}) error {
 		// translate all error at once
 		var buffer bytes.Buffer
 		rawErrs := e.(validator.ValidationErrors)
-		trans, found := uni.GetTranslator(Lang2Str(lang))
+		locale, err := lang.MarshalText()
+		if err != nil {
+			return err
+		}
+		trans, found := uni.GetTranslator(string(locale))
 		if found {
 			tansErrs := rawErrs.Translate(trans)
 			for _, err := range tansErrs {
@@ -97,7 +110,11 @@ func ValidateStructWithLanguage(lang LANG, i interface{}) error {
 			}
 		} else {
 			for _, err := range rawErrs {
-				buffer.WriteString(fmt.Sprintf("param:'%s' type:'%s' miss match with check:'%s';", err.Field(), err.Kind(), err.Tag()))
+				eStr := fmt.Sprintf("param:'%s' type:'%s' miss match with check:'%s';",
+					err.Field(),
+					err.Kind(),
+					err.Tag())
+				buffer.WriteString(eStr)
 			}
 		}
 		return errors.New(buffer.String())
@@ -105,14 +122,14 @@ func ValidateStructWithLanguage(lang LANG, i interface{}) error {
 	return nil
 }
 
-// @see ValidateStructWithLanguage LANG_EN
+// @see ValidateStructWithLanguage LangEN
 func ValidateStruct(i interface{}) error {
-	return ValidateStructWithLanguage(LANG_EN, i)
+	return ValidateStructWithLanguage(LangEN, i)
 }
 
-// @see ValidateStructWithLanguage LANG_EN
+// @see ValidateStructWithLanguage LangEN
 func Verify(i interface{}) error {
-	return ValidateStructWithLanguage(LANG_EN, i)
+	return ValidateStructWithLanguage(LangEN, i)
 }
 
 type __validator struct {
