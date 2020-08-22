@@ -46,11 +46,18 @@ func (this *promise) Wait(ctx context.Context) error {
 
 func (this *promise) WaitData(ctx context.Context) (interface{}, error) {
 	select {
-	case <-ctx.Done():
-		return nil, ErrFutureTimeout
 	case <-this.c:
+		return this.data, this.err
+	default:
+		{
+			select {
+			case <-ctx.Done():
+				return nil, ErrFutureTimeout
+			case <-this.c:
+			}
+			return this.data, this.err
+		}
 	}
-	return this.data, this.err
 }
 
 //完成等待
