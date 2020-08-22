@@ -47,6 +47,9 @@ func (this *_stdError) Is(err error) bool {
 	if err == error(this) || this.inherit == err {
 		return true
 	}
+	if this.inherit == error(this) && this.inherit != err {
+		return false
+	}
 	xe, ok := this.inherit.(*_stdError)
 	if ok {
 		return xe.Is(err)
