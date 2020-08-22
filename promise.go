@@ -1,16 +1,16 @@
 package std
 
 import (
+	"context"
 	"github.com/pkg/errors"
 	"sync/atomic"
-	"time"
 )
 
 var ErrFutureTimeout = errors.New("future wait timeout")
 
 type Future interface {
-	Wait(timeout time.Duration) error
-	WaitData(timeout time.Duration) (interface{}, error)
+	Wait(ctx context.Context) error
+	WaitData(ctx context.Context) (interface{}, error)
 }
 
 type Promise interface {
@@ -39,18 +39,14 @@ func (this *promise) GetFuture() Future {
 	return this
 }
 
-//等待
-func (this *promise) Wait(timeout time.Duration) error {
-	_, err := this.WaitData(timeout)
+func (this *promise) Wait(ctx context.Context) error {
+	_, err := this.WaitData(ctx)
 	return err
 }
 
-//等待,同时返回同步的数据
-func (this *promise) WaitData(timeout time.Duration) (interface{}, error) {
-	tm := time.NewTimer(timeout)
-	defer tm.Stop()
+func (this *promise) WaitData(ctx context.Context) (interface{}, error) {
 	select {
-	case <-tm.C:
+	case <-ctx.Done():
 		return nil, ErrFutureTimeout
 	case <-this.c:
 	}
@@ -68,5 +64,6 @@ func (this *promise) DoneData(err error, data interface{}) {
 		this.err = err
 		this.data = data
 		close(this.c)
+		return
 	}
 }
