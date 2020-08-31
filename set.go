@@ -23,10 +23,19 @@ type (
 func NewSet() Set {
 	return NewSetWithCap(16)
 }
+
 func NewSetWithCap(capHint int) Set {
 	return &setImpl{
 		holder: make(map[interface{}]uint8, capHint),
 	}
+}
+
+func NewSetFromStrings(arr []string) Set {
+	out := NewSetWithCap(len(arr))
+	for _, it := range arr {
+		out.Add(it)
+	}
+	return out
 }
 
 func (this *setImpl) Len() int {
