@@ -77,7 +77,7 @@ func Errorf(format string, args ...interface{}) Error {
 }
 
 func ErrorWrap(err error, msg string) Error {
-	return newErrorWrapped(err).SetMsg(fmt.Sprintf("%s:%s", msg, err.Error()))
+	return newErrorWrapped(err).SetMsg(fmt.Sprintf("%s: %s", msg, err.Error()))
 }
 
 func ErrorWrapf(err error, format string, args ...interface{}) Error {
