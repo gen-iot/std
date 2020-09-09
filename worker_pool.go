@@ -23,7 +23,6 @@ type WorkerPool struct {
 	cond        *sync.Cond
 }
 
-// expectWorkerNum 不应该超过CPU核心数量,否则取CPU核心数
 func NewWorkerPool(ctx context.Context, name string, expectWorkerNum int) *WorkerPool {
 	if expectWorkerNum <= 0 {
 		expectWorkerNum = runtime.NumCPU()
@@ -56,7 +55,7 @@ func (this *WorkerPool) workerTask() {
 	idleTimer := time.NewTimer(this.idle)
 	defer idleTimer.Stop()
 	//
-	stealPipe := make(chan WorkerFunc, 2)
+	stealPipe := make(chan WorkerFunc)
 	ctx, cancel := context.WithCancel(this.ctx)
 	wg := sync.WaitGroup{}
 	defer func() {
@@ -115,8 +114,9 @@ func (this *WorkerPool) startWorkerStealer(
 						continue
 					}
 				}
-				pipe <- this.taskBacklog.Remove(this.taskBacklog.Front()).(WorkerFunc)
+				f := this.taskBacklog.Remove(this.taskBacklog.Front()).(WorkerFunc)
 				this.cond.L.Unlock()
+				pipe <- f
 			}
 		}
 	}
